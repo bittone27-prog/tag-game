@@ -153,7 +153,7 @@ footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
         </div>
       </div>
       <div class="callout err" id="olErr" style="display:none" role="alert"></div>
-      <div class="callout"><b>Comment jouer :</b> chacun ouvre le même lien sur son ordinateur ou téléphone. Dans le jeu en ligne, tout le monde utilise <b>les mêmes touches</b> : <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> (ou <kbd>Q</kbd> <kbd>D</kbd> <kbd>Z</kbd>). Ta couleur s'affiche au début.</div>
+      <div class="callout"><b>Comment jouer :</b> chacun ouvre le même lien sur son ordinateur ou téléphone. Dans le jeu en ligne, tout le monde utilise <b>les mêmes touches</b> : <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> (ou <kbd>A</kbd> <kbd>D</kbd> <kbd>W</kbd>). Ta couleur s'affiche au début.</div>
     </div>
   </div>
 
@@ -175,12 +175,12 @@ footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
   </div>
   <div class="card"><div class="num">04 / TOUCHES (LOCAL)</div><h3>Contrôles</h3>
     <table class="keys"><tr><th>Joueur</th><th>Gauche</th><th>Droite</th><th>Saut</th></tr>
-    <tr><td>J1 rouge</td><td><kbd>Q</kbd></td><td><kbd>D</kbd></td><td><kbd>Z</kbd></td></tr>
+    <tr><td>J1 rouge</td><td><kbd>A</kbd></td><td><kbd>D</kbd></td><td><kbd>W</kbd></td></tr>
     <tr><td>J2 jaune</td><td><kbd>←</kbd></td><td><kbd>→</kbd></td><td><kbd>↑</kbd></td></tr>
     <tr><td>J3 vert</td><td><kbd>J</kbd></td><td><kbd>L</kbd></td><td><kbd>I</kbd></td></tr>
     <tr><td>J4 bleu</td><td><kbd>4</kbd></td><td><kbd>6</kbd></td><td><kbd>8</kbd></td></tr></table>
   </div>
-  <div class="callout"><b>En ligne :</b> chaque joueur utilise <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> ou <kbd>Q</kbd> <kbd>D</kbd> <kbd>Z</kbd> sur son propre ordinateur. Sur téléphone, utilise les boutons tactiles.</div>
+  <div class="callout"><b>En ligne :</b> chaque joueur utilise <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> ou <kbd>A</kbd> <kbd>D</kbd> <kbd>W</kbd> sur son propre ordinateur. Sur téléphone, utilise les boutons tactiles.</div>
 </section>
 
 <!-- TABLEAU DE BORD -->
@@ -244,8 +244,8 @@ const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const W=cv.width,H=cv.height,GROUND=H-40;
 const COLORS=['#e84040','#ffd92e','#17c94a','#3d8bff'];
 const NAMES=['rouge','jaune','vert','bleu'];
-/* Touches du mode local (AZERTY) */
-const ALT=[{l:'q',r:'d',j:'z'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp'},{l:'j',r:'l',j:'i'},{l:'4',r:'6',j:'8'}];
+/* Touches du mode local (QWERTY) */
+const ALT=[{l:'a',r:'d',j:'w'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp'},{l:'j',r:'l',j:'i'},{l:'4',r:'6',j:'8'}];
 const PLATS=[{x:120,y:400,w:200},{x:640,y:400,w:200},{x:380,y:300,w:200},{x:40,y:230,w:180},{x:740,y:230,w:180},{x:380,y:170,w:200}];
 let players=[],running=false,raf=0,timeLeft=60,last=0,keys={},touch={l:false,r:false,j:false};
 let online=false,myIdx=0; /* état du mode en ligne */
@@ -253,12 +253,12 @@ addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;keys[e.code]=true;
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;keys[e.code]=false;});
 [['tl','l'],['tr','r'],['tj','j']].forEach(([id,k])=>{const b=document.getElementById(id);['touchstart','mousedown'].forEach(ev=>b.addEventListener(ev,e=>{e.preventDefault();touch[k]=true;}));['touchend','touchcancel','mouseup','mouseleave'].forEach(ev=>b.addEventListener(ev,()=>touch[k]=false));});
 function down(i,a){const k=ALT[i][a];return keys[k]||keys[k.toLowerCase()]||(i===0&&touch[a]);}
-/* Touches du mode en ligne : flèches OU Q/D/Z OU A/W (QWERTY), + boutons tactiles */
+/* Touches du mode en ligne : flèches OU A/D/W (QWERTY), + boutons tactiles */
 function myInput(){
   return {
-    l:!!(keys['arrowleft']||keys['q']||keys['a']||touch.l),
+    l:!!(keys['arrowleft']||keys['a']||touch.l),
     r:!!(keys['arrowright']||keys['d']||touch.r),
-    j:!!(keys['arrowup']||keys['z']||keys['w']||keys[' ']||touch.j)
+    j:!!(keys['arrowup']||keys['w']||keys[' ']||touch.j)
   };
 }
 
