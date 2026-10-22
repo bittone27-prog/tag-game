@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>TAG // Projet 10</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#0c0e11;--panel:#15191f;--line:#303943;--acid:#d6ff3f;--orange:#ff713b;--cyan:#63d8d3;--txt:#aab4bf;--white:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.25;-webkit-mask-image:linear-gradient(#000,transparent 85%);mask-image:linear-gradient(#000,transparent 85%);pointer-events:none;z-index:0}
+h1,h2,h3,.logo,.tab,.btn{font-family:'Barlow Condensed',Impact,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+header{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(21,25,31,.9)}
+.logo{font-size:28px;color:var(--white);font-weight:800}.logo b{color:var(--acid)}
+.status{font-size:11px;display:flex;align-items:center;gap:8px;color:var(--acid)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--acid);box-shadow:0 0 10px var(--acid);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.3}}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+.tab{background:transparent;border:1px solid var(--line);color:var(--txt);padding:8px 16px;font-size:17px;cursor:pointer}
+.tab:hover{color:var(--white);border-color:var(--txt)}
+.tab.active{border-color:var(--acid);color:var(--acid);background:rgba(214,255,63,.08);box-shadow:3px 3px 0 var(--acid)}
+main{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:24px 16px 60px}
+.screen{display:none}.screen.active{display:block;animation:in .4s ease}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hero{position:relative;padding:30px 0}
+.ghost{position:absolute;right:0;top:-30px;font-family:'Barlow Condensed',Impact;font-size:260px;font-weight:800;color:rgba(214,255,63,.05);line-height:1;pointer-events:none}
+.hero h1{position:relative;font-size:clamp(72px,16vw,150px);line-height:.9;color:var(--white)}
+.hero h1 span{color:var(--acid)}
+.hero p{position:relative;max-width:520px;margin:16px 0 24px;font-size:14px;line-height:1.7}
+.hero p b{color:var(--white)}
+.btn{background:var(--acid);color:#000;border:none;padding:12px 26px;font-size:22px;font-weight:800;cursor:pointer;box-shadow:5px 5px 0 var(--orange);transition:.12s}
+.btn:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 var(--orange)}
+.btn.cyan{background:var(--cyan)}
+.mission{transform:rotate(2deg);background:var(--panel);border:1px solid var(--line);padding:18px;margin-top:30px;max-width:420px;display:flex;gap:22px}
+.mission div{text-align:center}.mission strong{display:block;font-family:'Barlow Condensed',Impact;font-size:50px;color:var(--acid);line-height:1}
+.mission small{font-size:10px;text-transform:uppercase}
+.sec{font-size:12px;color:var(--orange);margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:14px 0}
+.card{background:var(--panel);border:1px solid var(--line);padding:16px;position:relative}
+.card .num{color:var(--orange);font-size:11px;margin-bottom:6px}
+.card h3{color:var(--white);font-size:24px;margin-bottom:8px}
+.card p,.card li{font-size:13px;line-height:1.6}
+.card ul{list-style:none}
+.callout{border-left:4px solid var(--acid);background:rgba(214,255,63,.06);padding:12px 16px;margin:14px 0;font-size:13px;line-height:1.6}
+.callout b{color:var(--white)}
+.pill{display:inline-block;border:1px solid var(--line);padding:3px 10px;font-size:11px;margin:2px;color:var(--white)}
+.pick{display:flex;flex-direction:column;gap:14px;max-width:360px;margin:20px 0}
+.pick .btn{font-size:30px;text-align:center;box-shadow:5px 5px 0 #000}
+.pick .p2{background:#e84040;color:#fff}.pick .p3{background:#ffd92e}.pick .p4{background:#17c94a;color:#fff}
+.pick .btn:hover{transform:translate(2px,2px)}
+#game-wrap{display:none}
+.hud{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;font-size:12px}
+canvas{width:100%;max-width:960px;background:#3fa0f5;border:2px solid var(--acid);box-shadow:6px 6px 0 var(--orange);display:block;touch-action:none}
+.touch{display:none;margin-top:10px;gap:8px;flex-wrap:wrap}
+.touch button{flex:1;min-width:70px;padding:16px 0;font-family:'Barlow Condensed',Impact;font-size:20px;background:var(--panel);color:var(--white);border:1px solid var(--line)}
+.touch button:active{background:var(--acid);color:#000}
+@media(pointer:coarse){.touch{display:flex}}
+.bar{height:14px;background:#0a0c0f;border:1px solid var(--line);margin:8px 0}
+.bar i{display:block;height:100%;background:var(--acid);width:0;transition:width .5s}
+.stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.stat b{color:var(--white)}
+.keys{width:100%;border-collapse:collapse;font-size:13px}
+.keys td,.keys th{border:1px solid var(--line);padding:8px;text-align:left}.keys th{color:var(--acid)}
+kbd{background:#0a0c0f;border:1px solid var(--line);padding:1px 6px;color:var(--white)}
+footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
+@media(max-width:640px){header{padding:10px}.ghost{font-size:140px}.mission{max-width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">TAG<b>//</b>10</div>
+  <div class="status"><span class="dot"></span>SYSTÈME PRÊT</div>
+  <nav aria-label="Navigation principale">
+    <button class="tab active" data-tab="home" aria-label="Accueil">Accueil</button>
+    <button class="tab" data-tab="play" aria-label="Jouer">Jouer</button>
+    <button class="tab" data-tab="rules" aria-label="Règles et contrôles">Règles</button>
+    <button class="tab" data-tab="stats" aria-label="Tableau de bord">Tableau de bord</button>
+  </nav>
+</header>
+<main>
+
+<!-- ACCUEIL -->
+<section class="screen active" id="home">
+  <div class="hero">
+    <div class="ghost">04</div>
+    <p class="sec">// MISSION</p>
+    <h1>TAG<span>.</span></h1>
+    <p>Un joueur est <b>le chat</b>. Touche un autre joueur pour lui passer le rôle. Celui qui est chat le moins longtemps <b>gagne la manche</b>. <b>2 à 4 joueurs</b> sur le même écran.</p>
+    <button class="btn" id="goPlay" aria-label="Aller au menu de jeu">Lancer le jeu</button>
+    <div class="mission"><div><strong>2-4</strong><small>Joueurs</small></div><div><strong>60</strong><small>Secondes</small></div><div><strong>1</strong><small>Chat</small></div></div>
+  </div>
+</section>
+
+<!-- JOUER -->
+<section class="screen" id="play">
+  <div id="menu-wrap">
+    <p class="sec">// SÉLECTION</p>
+    <h2 style="font-size:56px;color:#fff">Choisis le nombre de joueurs</h2>
+    <div class="pick">
+      <button class="btn p2" data-n="2" aria-label="2 joueurs">2 Players</button>
+      <button class="btn p3" data-n="3" aria-label="3 joueurs">3 Players</button>
+      <button class="btn p4" data-n="4" aria-label="4 joueurs">4 Players</button>
+    </div>
+    <div class="callout"><b>Astuce :</b> sur téléphone, des boutons tactiles apparaissent pour le joueur 1.</div>
+  </div>
+  <div id="game-wrap">
+    <div class="hud"><span class="pill" id="hudTime">TEMPS 60</span><span class="pill" id="hudChat">CHAT : -</span><button class="tab" id="quit" aria-label="Quitter la partie">Quitter</button></div>
+    <canvas id="c" width="960" height="540" aria-label="Zone de jeu"></canvas>
+    <div class="touch" aria-label="Contrôles tactiles"><button id="tl" aria-label="Gauche">◀</button><button id="tj" aria-label="Sauter">SAUT</button><button id="tr" aria-label="Droite">▶</button></div>
+  </div>
+</section>
+
+<!-- REGLES -->
+<section class="screen" id="rules">
+  <p class="sec">// PROTOCOLE</p>
+  <h2 style="font-size:56px;color:#fff">Règles & contrôles</h2>
+  <div class="grid">
+    <div class="card"><div class="num">01 / BUT</div><h3>Ne sois pas chat</h3><p>Le chat accumule du temps. À la fin des 60 secondes, le joueur avec le <b>moins de temps</b> gagne.</p></div>
+    <div class="card"><div class="num">02 / TRANSFERT</div><h3>Touche pour passer</h3><p>Quand le chat touche un joueur, le rôle change. Un court délai d'immunité évite les rebonds instantanés.</p></div>
+    <div class="card"><div class="num">03 / PLATEFORMES</div><h3>Saute !</h3><p>Utilise les plateformes pour fuir ou pour rattraper. Les bords de l'écran sont reliés.</p></div>
+  </div>
+  <div class="card"><div class="num">04 / TOUCHES</div><h3>Contrôles</h3>
+    <table class="keys"><tr><th>Joueur</th><th>Gauche</th><th>Droite</th><th>Saut</th></tr>
+    <tr><td>J1 rouge</td><td><kbd>Q</kbd></td><td><kbd>D</kbd></td><td><kbd>Z</kbd></td></tr>
+    <tr><td>J2 jaune</td><td><kbd>←</kbd></td><td><kbd>→</kbd></td><td><kbd>↑</kbd></td></tr>
+    <tr><td>J3 vert</td><td><kbd>J</kbd></td><td><kbd>L</kbd></td><td><kbd>I</kbd></td></tr>
+    <tr><td>J4 bleu</td><td><kbd>4</kbd></td><td><kbd>6</kbd></td><td><kbd>8</kbd></td></tr></table>
+  </div>
+</section>
+
+<!-- TABLEAU DE BORD -->
+<section class="screen" id="stats">
+  <p class="sec">// TABLEAU DE BORD</p>
+  <h2 style="font-size:56px;color:#fff">Progression</h2>
+  <div class="grid">
+    <div class="card"><div class="num">01 / NIVEAU</div><h3>Niveau <span id="lvl">1</span></h3><div class="bar"><i id="xpbar"></i></div><p><span id="xp">0</span> / <span id="xpmax">100</span> XP</p></div>
+    <div class="card"><div class="num">02 / STATS</div><h3>Historique</h3>
+      <div class="stat"><span>Parties jouées</span><b id="sGames">0</b></div>
+      <div class="stat"><span>Victoires J1</span><b id="sW1">0</b></div>
+      <div class="stat"><span>Victoires J2</span><b id="sW2">0</b></div>
+      <div class="stat"><span>Victoires J3</span><b id="sW3">0</b></div>
+      <div class="stat"><span>Victoires J4</span><b id="sW4">0</b></div>
+    </div>
+    <div class="card"><div class="num">03 / GRAPHIQUE</div><h3>Victoires</h3><canvas id="chart" width="300" height="150" style="width:100%;border:none;box-shadow:none;background:transparent" aria-label="Graphique des victoires"></canvas></div>
+  </div>
+  <div class="card"><div class="num">04 / MANCHES</div><h3>Objectifs</h3>
+    <ul><li><label><input type="checkbox" data-t="a"> Jouer 3 parties</label></li><li><label><input type="checkbox" data-t="b"> Gagner une partie à 4 joueurs</label></li><li><label><input type="checkbox" data-t="c"> Finir sans être chat plus de 15 s</label></li></ul>
+    <br><button class="btn cyan" id="reset" aria-label="Réinitialiser les données">Réinitialiser</button></div>
+</section>
+
+</main>
+<footer>TAG // Projet 10 — jeu local 2 à 4 joueurs</footer>
+
+<script>
+/* ===== NAVIGATION ===== */
+const tabs=document.querySelectorAll('.tab[data-tab]'),screens=document.querySelectorAll('.screen');
+function show(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===id));if(id==='stats')renderStats();if(id!=='play')stopGame();}
+tabs.forEach(t=>t.onclick=()=>show(t.dataset.tab));
+document.getElementById('goPlay').onclick=()=>show('play');
+
+/* ===== SAUVEGARDE ===== */
+let save=JSON.parse(localStorage.getItem('tag10')||'null')||{xp:0,games:0,wins:[0,0,0,0],tasks:{}};
+function store(){localStorage.setItem('tag10',JSON.stringify(save));}
+function renderStats(){
+  const lvl=Math.floor(save.xp/100)+1,cur=save.xp%100;
+  lvl_.textContent=lvl;xp.textContent=cur;xpbar.style.width=cur+'%';
+  sGames.textContent=save.games;[1,2,3,4].forEach(i=>document.getElementById('sW'+i).textContent=save.wins[i-1]);
+  document.querySelectorAll('[data-t]').forEach(c=>{c.checked=!!save.tasks[c.dataset.t];c.onchange=()=>{save.tasks[c.dataset.t]=c.checked;store();};});
+  drawChart();
+}
+const lvl_=document.getElementById('lvl'),xp=document.getElementById('xp'),xpbar=document.getElementById('xpbar');
+const sGames=document.getElementById('sGames');
+function drawChart(){
+  const c=document.getElementById('chart'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
+  const cols=['#e84040','#ffd92e','#17c94a','#3d8bff'],max=Math.max(1,...save.wins);
+  save.wins.forEach((w,i)=>{const h=(w/max)*100,bx=20+i*70;x.fillStyle=cols[i];x.fillRect(bx,125-h,50,h);x.fillStyle='#fff';x.font='12px DM Mono, monospace';x.fillText('J'+(i+1)+' : '+w,bx,142);});
+}
+document.getElementById('reset').onclick=()=>{if(confirm('Tout réinitialiser ?')){save={xp:0,games:0,wins:[0,0,0,0],tasks:{}};store();renderStats();}};
+
+/* ===== JEU ===== */
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,GROUND=H-40;
+const COLORS=['#e84040','#ffd92e','#17c94a','#3d8bff'];
+const CTRL=[{l:'KeyA',r:'KeyD',j:'KeyW'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp'},{l:'KeyJ',r:'KeyL',j:'KeyI'},{l:'Numpad4',r:'Numpad6',j:'Numpad8'}];
+/* AZERTY : Q/Z sont sur les mêmes touches physiques que A/W en code QWERTY ; on accepte aussi les lettres */
+const ALT=[{l:'q',r:'d',j:'z'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp'},{l:'j',r:'l',j:'i'},{l:'4',r:'6',j:'8'}];
+const PLATS=[{x:120,y:400,w:200},{x:640,y:400,w:200},{x:380,y:300,w:200},{x:40,y:230,w:180},{x:740,y:230,w:180},{x:380,y:170,w:200}];
+let players=[],running=false,raf=0,timeLeft=60,last=0,keys={},touch={l:false,r:false,j:false};
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;keys[e.code]=true;if(running&&e.key.startsWith('Arrow')||e.key===' ')e.preventDefault();});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;keys[e.code]=false;});
+[['tl','l'],['tr','r'],['tj','j']].forEach(([id,k])=>{const b=document.getElementById(id);['touchstart','mousedown'].forEach(ev=>b.addEventListener(ev,e=>{e.preventDefault();touch[k]=true;}));['touchend','touchcancel','mouseup','mouseleave'].forEach(ev=>b.addEventListener(ev,()=>touch[k]=false));});
+function down(i,a){const k=ALT[i][a];return keys[k]||keys[k.toLowerCase()]||(i===0&&touch[a]);}
+
+function startGame(n){
+  players=[];
+  for(let i=0;i<n;i++)players.push({i,x:120+i*220,y:100,vx:0,vy:0,w:34,h:34,cat:false,time:0,imm:0,ground:false,face:1});
+  players[Math.floor(Math.random()*n)].cat=true;
+  timeLeft=60;running=true;last=performance.now();
+  menu_.style.display='none';gameWrap.style.display='block';
+  cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
+}
+const menu_=document.getElementById('menu-wrap'),gameWrap=document.getElementById('game-wrap');
+document.querySelectorAll('.pick .btn').forEach(b=>b.onclick=()=>startGame(+b.dataset.n));
+document.getElementById('quit').onclick=stopGame;
+function stopGame(){running=false;cancelAnimationFrame(raf);menu_.style.display='block';gameWrap.style.display='none';}
+
+function update(dt){
+  timeLeft-=dt;
+  players.forEach(p=>{
+    const sp=p.cat?330:290;
+    p.vx=0;if(down(p.i,'l')){p.vx=-sp;p.face=-1;}if(down(p.i,'r')){p.vx=sp;p.face=1;}
+    if(down(p.i,'j')&&p.ground){p.vy=-640;p.ground=false;}
+    p.vy+=1700*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(p.x<-p.w)p.x=W;if(p.x>W)p.x=-p.w;
+    p.ground=false;
+    if(p.y+p.h>=GROUND){p.y=GROUND-p.h;p.vy=0;p.ground=true;}
+    PLATS.forEach(pl=>{if(p.vy>=0&&p.x+p.w>pl.x&&p.x<pl.x+pl.w&&p.y+p.h>=pl.y&&p.y+p.h-p.vy*dt<=pl.y+4){p.y=pl.y-p.h;p.vy=0;p.ground=true;}});
+    if(p.imm>0)p.imm-=dt;
+    if(p.cat)p.time+=dt;
+  });
+  const cat=players.find(p=>p.cat);
+  if(cat&&cat.imm<=0)players.forEach(o=>{if(o!==cat&&o.imm<=0&&cat.x<o.x+o.w&&cat.x+cat.w>o.x&&cat.y<o.y+o.h&&cat.y+cat.h>o.y){cat.cat=false;o.cat=true;o.imm=1.2;cat.imm=1.2;}});
+  hudTime.textContent='TEMPS '+Math.max(0,Math.ceil(timeLeft));
+  hudChat.textContent='CHAT : J'+((cat?cat.i:0)+1);
+  if(timeLeft<=0)endGame();
+}
+const hudTime=document.getElementById('hudTime'),hudChat=document.getElementById('hudChat');
+
+function draw(){
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3fa0f5');g.addColorStop(1,'#6cc4fb');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(60,110,220,.35)';ctx.fillRect(180,260,70,GROUND-260);ctx.fillRect(700,240,70,GROUND-240);
+  ctx.fillStyle='#1f8a4c';ctx.fillRect(0,GROUND,W,40);
+  ctx.fillStyle='#8b2252';PLATS.forEach(pl=>{ctx.fillRect(pl.x,pl.y,pl.w,14);});
+  ctx.fillStyle='#17c94a';PLATS.forEach(pl=>{ctx.fillRect(pl.x,pl.y-4,pl.w,6);});
+  players.forEach(p=>{
+    if(p.imm>0&&Math.floor(p.imm*10)%2)ctx.globalAlpha=.4;
+    ctx.fillStyle='#10303b';ctx.fillRect(p.x,p.y,p.w,p.h);
+    ctx.fillRect(p.x+3,p.y-8,8,10);ctx.fillRect(p.x+p.w-11,p.y-8,8,10);
+    ctx.fillStyle=COLORS[p.i];ctx.fillRect(p.x-2,p.y+6,p.w+4,7);
+    ctx.fillStyle='#fff';ctx.fillRect(p.x+7,p.y+16,8,8);ctx.fillRect(p.x+19,p.y+16,8,8);
+    ctx.fillStyle='#000';ctx.fillRect(p.x+9+p.face*2,p.y+19,4,4);ctx.fillRect(p.x+21+p.face*2,p.y+19,4,4);
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#fff';ctx.font='bold 13px DM Mono, monospace';ctx.textAlign='center';ctx.fillText('J'+(p.i+1),p.x+p.w/2,p.y-14);
+    if(p.cat){ctx.fillStyle='#ff713b';ctx.fillText('▼ CHAT',p.x+p.w/2,p.y-28);}
+  });
+  ctx.textAlign='left';
+  ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(8,8,170,players.length*20+10);
+  players.forEach((p,i)=>{ctx.fillStyle=COLORS[i];ctx.font='13px DM Mono, monospace';ctx.fillText('J'+(i+1)+' chat : '+p.time.toFixed(1)+'s',14,26+i*20);});
+}
+
+function loop(t){
+  if(!running)return;
+  const dt=Math.min(.033,(t-last)/1000);last=t;
+  update(dt);if(!running)return;draw();raf=requestAnimationFrame(loop);
+}
+
+function endGame(){
+  running=false;cancelAnimationFrame(raf);draw();
+  const sorted=[...players].sort((a,b)=>a.time-b.time),win=sorted[0];
+  save.games++;save.wins[win.i]++;save.xp+=20+players.length*5;
+  if(save.games>=3)save.tasks.a=true;
+  if(players.length===4&&win.i===0)save.tasks.b=true;
+  if(players.some(p=>p.i===0&&p.time<=15))save.tasks.c=true;
+  store();
+  ctx.fillStyle='rgba(12,14,17,.88)';ctx.fillRect(0,0,W,H);
+  ctx.textAlign='center';ctx.fillStyle='#d6ff3f';ctx.font='bold 72px Impact, sans-serif';ctx.fillText('J'+(win.i+1)+' GAGNE !',W/2,170);
+  ctx.font='18px DM Mono, monospace';
+  sorted.forEach((p,i)=>{ctx.fillStyle=COLORS[p.i];ctx.fillText((i+1)+'. J'+(p.i+1)+' — chat '+p.time.toFixed(1)+'s',W/2,240+i*32);});
+  ctx.fillStyle='#fff';ctx.fillText('+'+(20+players.length*5)+' XP  •  clique « Quitter » pour rejouer',W/2,420);
+  ctx.textAlign='left';
+}
+renderStats();
+</script>
+</body>
+</html>
