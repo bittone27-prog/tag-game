@@ -44,11 +44,22 @@ main{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:24px 16p
 .card ul{list-style:none}
 .callout{border-left:4px solid var(--acid);background:rgba(214,255,63,.06);padding:12px 16px;margin:14px 0;font-size:13px;line-height:1.6}
 .callout b{color:var(--white)}
+.callout.err{border-left-color:var(--orange);background:rgba(255,113,59,.08)}
 .pill{display:inline-block;border:1px solid var(--line);padding:3px 10px;font-size:11px;margin:2px;color:var(--white)}
 .pick{display:flex;flex-direction:column;gap:14px;max-width:360px;margin:20px 0}
 .pick .btn{font-size:30px;text-align:center;box-shadow:5px 5px 0 #000}
 .pick .p2{background:#e84040;color:#fff}.pick .p3{background:#ffd92e}.pick .p4{background:#17c94a;color:#fff}
 .pick .btn:hover{transform:translate(2px,2px)}
+.modes{display:flex;gap:10px;margin:18px 0;flex-wrap:wrap}
+.modes .tab{font-size:22px;padding:10px 22px}
+.sub{display:none}.sub.active{display:block}
+.lobby{display:flex;flex-direction:column;gap:12px;max-width:420px;margin:20px 0}
+.lobby input{background:#0a0c0f;border:2px solid var(--line);color:var(--acid);font-family:'Barlow Condensed',Impact;font-size:44px;letter-spacing:.3em;text-transform:uppercase;text-align:center;padding:8px;width:100%}
+.lobby input:focus{outline:none;border-color:var(--acid)}
+.code{font-family:'Barlow Condensed',Impact;font-size:96px;line-height:1;color:var(--acid);letter-spacing:.2em;margin:6px 0}
+.slots{display:flex;gap:8px;margin:10px 0}
+.slot{width:46px;height:46px;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',Impact;font-size:22px;color:var(--line)}
+.slot.on{border-style:solid;color:#fff}
 #game-wrap{display:none}
 .hud{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;font-size:12px}
 canvas{width:100%;max-width:960px;background:#3fa0f5;border:2px solid var(--acid);box-shadow:6px 6px 0 var(--orange);display:block;touch-action:none}
@@ -64,7 +75,7 @@ canvas{width:100%;max-width:960px;background:#3fa0f5;border:2px solid var(--acid
 .keys td,.keys th{border:1px solid var(--line);padding:8px;text-align:left}.keys th{color:var(--acid)}
 kbd{background:#0a0c0f;border:1px solid var(--line);padding:1px 6px;color:var(--white)}
 footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
-@media(max-width:640px){header{padding:10px}.ghost{font-size:140px}.mission{max-width:100%}}
+@media(max-width:640px){header{padding:10px}.ghost{font-size:140px}.mission{max-width:100%}.code{font-size:72px}}
 </style>
 </head>
 <body>
@@ -86,7 +97,7 @@ footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
     <div class="ghost">04</div>
     <p class="sec">// MISSION</p>
     <h1>TAG<span>.</span></h1>
-    <p>Un joueur est <b>le chat</b>. Touche un autre joueur pour lui passer le rôle. Celui qui est chat le moins longtemps <b>gagne la manche</b>. <b>2 à 4 joueurs</b> sur le même écran.</p>
+    <p>Un joueur est <b>le chat</b>. Touche un autre joueur pour lui passer le rôle. Celui qui est chat le moins longtemps <b>gagne la manche</b>. <b>2 à 4 joueurs</b>, sur le même écran ou <b>en ligne sur plusieurs ordinateurs</b>.</p>
     <button class="btn" id="goPlay" aria-label="Aller au menu de jeu">Lancer le jeu</button>
     <div class="mission"><div><strong>2-4</strong><small>Joueurs</small></div><div><strong>60</strong><small>Secondes</small></div><div><strong>1</strong><small>Chat</small></div></div>
   </div>
@@ -96,16 +107,58 @@ footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
 <section class="screen" id="play">
   <div id="menu-wrap">
     <p class="sec">// SÉLECTION</p>
-    <h2 style="font-size:56px;color:#fff">Choisis le nombre de joueurs</h2>
-    <div class="pick">
-      <button class="btn p2" data-n="2" aria-label="2 joueurs">2 Players</button>
-      <button class="btn p3" data-n="3" aria-label="3 joueurs">3 Players</button>
-      <button class="btn p4" data-n="4" aria-label="4 joueurs">4 Players</button>
+    <h2 style="font-size:56px;color:#fff">Choisis ton mode</h2>
+    <div class="modes" role="tablist" aria-label="Mode de jeu">
+      <button class="tab active" data-mode="local" aria-label="Mode local, même écran">Local (même écran)</button>
+      <button class="tab" data-mode="online" aria-label="Mode en ligne, plusieurs ordinateurs">En ligne (plusieurs PC)</button>
     </div>
-    <div class="callout"><b>Astuce :</b> sur téléphone, des boutons tactiles apparaissent pour le joueur 1.</div>
+
+    <!-- LOCAL -->
+    <div class="sub active" id="mode-local">
+      <div class="pick">
+        <button class="btn p2" data-n="2" aria-label="2 joueurs">2 Players</button>
+        <button class="btn p3" data-n="3" aria-label="3 joueurs">3 Players</button>
+        <button class="btn p4" data-n="4" aria-label="4 joueurs">4 Players</button>
+      </div>
+      <div class="callout"><b>Astuce :</b> tout le monde joue sur le même clavier (voir l'onglet Règles).</div>
+    </div>
+
+    <!-- EN LIGNE -->
+    <div class="sub" id="mode-online">
+      <div id="ol-start">
+        <div class="grid">
+          <div class="card"><div class="num">01 / CRÉER</div><h3>Créer un salon</h3>
+            <p>Tu reçois un code à donner à tes amis. La partie démarre quand le salon est plein.</p><br>
+            <div class="pick" style="margin:0">
+              <button class="btn p2" data-create="2" aria-label="Créer un salon à 2 joueurs">2 Players</button>
+              <button class="btn p3" data-create="3" aria-label="Créer un salon à 3 joueurs">3 Players</button>
+              <button class="btn p4" data-create="4" aria-label="Créer un salon à 4 joueurs">4 Players</button>
+            </div>
+          </div>
+          <div class="card"><div class="num">02 / REJOINDRE</div><h3>Rejoindre</h3>
+            <p>Entre le code à 4 lettres donné par ton ami.</p><br>
+            <div class="lobby" style="margin:0">
+              <input id="joinCode" maxlength="4" placeholder="ABCD" autocomplete="off" aria-label="Code du salon">
+              <button class="btn" id="joinBtn" aria-label="Rejoindre le salon">Rejoindre</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="ol-wait" style="display:none">
+        <div class="card"><div class="num">SALON</div><h3>Donne ce code à tes amis</h3>
+          <div class="code" id="roomCode">----</div>
+          <div class="slots" id="slots"></div>
+          <p id="waitTxt">En attente des joueurs…</p><br>
+          <button class="tab" id="cancelWait" aria-label="Quitter le salon">Quitter le salon</button>
+        </div>
+      </div>
+      <div class="callout err" id="olErr" style="display:none" role="alert"></div>
+      <div class="callout"><b>Comment jouer :</b> chacun ouvre le même lien sur son ordinateur ou téléphone. Dans le jeu en ligne, tout le monde utilise <b>les mêmes touches</b> : <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> (ou <kbd>Q</kbd> <kbd>D</kbd> <kbd>Z</kbd>). Ta couleur s'affiche au début.</div>
+    </div>
   </div>
+
   <div id="game-wrap">
-    <div class="hud"><span class="pill" id="hudTime">TEMPS 60</span><span class="pill" id="hudChat">CHAT : -</span><button class="tab" id="quit" aria-label="Quitter la partie">Quitter</button></div>
+    <div class="hud"><span class="pill" id="hudTime">TEMPS 60</span><span class="pill" id="hudChat">CHAT : -</span><span class="pill" id="hudYou" style="display:none"></span><button class="tab" id="quit" aria-label="Quitter la partie">Quitter</button></div>
     <canvas id="c" width="960" height="540" aria-label="Zone de jeu"></canvas>
     <div class="touch" aria-label="Contrôles tactiles"><button id="tl" aria-label="Gauche">◀</button><button id="tj" aria-label="Sauter">SAUT</button><button id="tr" aria-label="Droite">▶</button></div>
   </div>
@@ -120,13 +173,14 @@ footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
     <div class="card"><div class="num">02 / TRANSFERT</div><h3>Touche pour passer</h3><p>Quand le chat touche un joueur, le rôle change. Un court délai d'immunité évite les rebonds instantanés.</p></div>
     <div class="card"><div class="num">03 / PLATEFORMES</div><h3>Saute !</h3><p>Utilise les plateformes pour fuir ou pour rattraper. Les bords de l'écran sont reliés.</p></div>
   </div>
-  <div class="card"><div class="num">04 / TOUCHES</div><h3>Contrôles</h3>
+  <div class="card"><div class="num">04 / TOUCHES (LOCAL)</div><h3>Contrôles</h3>
     <table class="keys"><tr><th>Joueur</th><th>Gauche</th><th>Droite</th><th>Saut</th></tr>
     <tr><td>J1 rouge</td><td><kbd>Q</kbd></td><td><kbd>D</kbd></td><td><kbd>Z</kbd></td></tr>
     <tr><td>J2 jaune</td><td><kbd>←</kbd></td><td><kbd>→</kbd></td><td><kbd>↑</kbd></td></tr>
     <tr><td>J3 vert</td><td><kbd>J</kbd></td><td><kbd>L</kbd></td><td><kbd>I</kbd></td></tr>
     <tr><td>J4 bleu</td><td><kbd>4</kbd></td><td><kbd>6</kbd></td><td><kbd>8</kbd></td></tr></table>
   </div>
+  <div class="callout"><b>En ligne :</b> chaque joueur utilise <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> ou <kbd>Q</kbd> <kbd>D</kbd> <kbd>Z</kbd> sur son propre ordinateur. Sur téléphone, utilise les boutons tactiles.</div>
 </section>
 
 <!-- TABLEAU DE BORD -->
@@ -150,7 +204,7 @@ footer{text-align:center;font-size:11px;padding:20px;color:#5c6670}
 </section>
 
 </main>
-<footer>TAG // Projet 10 — jeu local 2 à 4 joueurs</footer>
+<footer>TAG // Projet 10 — 2 à 4 joueurs, local ou en ligne</footer>
 
 <script>
 /* ===== NAVIGATION ===== */
@@ -178,21 +232,42 @@ function drawChart(){
 }
 document.getElementById('reset').onclick=()=>{if(confirm('Tout réinitialiser ?')){save={xp:0,games:0,wins:[0,0,0,0],tasks:{}};store();renderStats();}};
 
-/* ===== JEU ===== */
+/* ===== CHOIX DU MODE ===== */
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));
+  document.getElementById('mode-local').classList.toggle('active',b.dataset.mode==='local');
+  document.getElementById('mode-online').classList.toggle('active',b.dataset.mode==='online');
+});
+
+/* ===== JEU (commun) ===== */
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const W=cv.width,H=cv.height,GROUND=H-40;
 const COLORS=['#e84040','#ffd92e','#17c94a','#3d8bff'];
-const CTRL=[{l:'KeyA',r:'KeyD',j:'KeyW'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp'},{l:'KeyJ',r:'KeyL',j:'KeyI'},{l:'Numpad4',r:'Numpad6',j:'Numpad8'}];
-/* AZERTY : Q/Z sont sur les mêmes touches physiques que A/W en code QWERTY ; on accepte aussi les lettres */
+const NAMES=['rouge','jaune','vert','bleu'];
+/* Touches du mode local (AZERTY) */
 const ALT=[{l:'q',r:'d',j:'z'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp'},{l:'j',r:'l',j:'i'},{l:'4',r:'6',j:'8'}];
 const PLATS=[{x:120,y:400,w:200},{x:640,y:400,w:200},{x:380,y:300,w:200},{x:40,y:230,w:180},{x:740,y:230,w:180},{x:380,y:170,w:200}];
 let players=[],running=false,raf=0,timeLeft=60,last=0,keys={},touch={l:false,r:false,j:false};
-addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;keys[e.code]=true;if(running&&e.key.startsWith('Arrow')||e.key===' ')e.preventDefault();});
+let online=false,myIdx=0; /* état du mode en ligne */
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;keys[e.code]=true;if(running&&(e.key.startsWith('Arrow')||e.key===' '))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;keys[e.code]=false;});
 [['tl','l'],['tr','r'],['tj','j']].forEach(([id,k])=>{const b=document.getElementById(id);['touchstart','mousedown'].forEach(ev=>b.addEventListener(ev,e=>{e.preventDefault();touch[k]=true;}));['touchend','touchcancel','mouseup','mouseleave'].forEach(ev=>b.addEventListener(ev,()=>touch[k]=false));});
 function down(i,a){const k=ALT[i][a];return keys[k]||keys[k.toLowerCase()]||(i===0&&touch[a]);}
+/* Touches du mode en ligne : flèches OU Q/D/Z OU A/W (QWERTY), + boutons tactiles */
+function myInput(){
+  return {
+    l:!!(keys['arrowleft']||keys['q']||keys['a']||touch.l),
+    r:!!(keys['arrowright']||keys['d']||touch.r),
+    j:!!(keys['arrowup']||keys['z']||keys['w']||keys[' ']||touch.j)
+  };
+}
 
+const menu_=document.getElementById('menu-wrap'),gameWrap=document.getElementById('game-wrap');
+const hudTime=document.getElementById('hudTime'),hudChat=document.getElementById('hudChat'),hudYou=document.getElementById('hudYou');
+
+/* ===== MODE LOCAL ===== */
 function startGame(n){
+  online=false;hudYou.style.display='none';
   players=[];
   for(let i=0;i<n;i++)players.push({i,x:120+i*220,y:100,vx:0,vy:0,w:34,h:34,cat:false,time:0,imm:0,ground:false,face:1});
   players[Math.floor(Math.random()*n)].cat=true;
@@ -200,10 +275,15 @@ function startGame(n){
   menu_.style.display='none';gameWrap.style.display='block';
   cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
 }
-const menu_=document.getElementById('menu-wrap'),gameWrap=document.getElementById('game-wrap');
-document.querySelectorAll('.pick .btn').forEach(b=>b.onclick=()=>startGame(+b.dataset.n));
+document.querySelectorAll('.pick [data-n]').forEach(b=>b.onclick=()=>startGame(+b.dataset.n));
 document.getElementById('quit').onclick=stopGame;
-function stopGame(){running=false;cancelAnimationFrame(raf);menu_.style.display='block';gameWrap.style.display='none';}
+function stopGame(){
+  running=false;cancelAnimationFrame(raf);
+  if(online){wsSend({type:'leave'});closeWS();}
+  online=false;
+  menu_.style.display='block';gameWrap.style.display='none';
+  showOnlineStart();
+}
 
 function update(dt){
   timeLeft-=dt;
@@ -225,7 +305,6 @@ function update(dt){
   hudChat.textContent='CHAT : J'+((cat?cat.i:0)+1);
   if(timeLeft<=0)endGame();
 }
-const hudTime=document.getElementById('hudTime'),hudChat=document.getElementById('hudChat');
 
 function draw(){
   const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3fa0f5');g.addColorStop(1,'#6cc4fb');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -241,7 +320,8 @@ function draw(){
     ctx.fillStyle='#fff';ctx.fillRect(p.x+7,p.y+16,8,8);ctx.fillRect(p.x+19,p.y+16,8,8);
     ctx.fillStyle='#000';ctx.fillRect(p.x+9+p.face*2,p.y+19,4,4);ctx.fillRect(p.x+21+p.face*2,p.y+19,4,4);
     ctx.globalAlpha=1;
-    ctx.fillStyle='#fff';ctx.font='bold 13px DM Mono, monospace';ctx.textAlign='center';ctx.fillText('J'+(p.i+1),p.x+p.w/2,p.y-14);
+    ctx.fillStyle='#fff';ctx.font='bold 13px DM Mono, monospace';ctx.textAlign='center';
+    ctx.fillText((online&&p.i===myIdx)?'TOI':'J'+(p.i+1),p.x+p.w/2,p.y-14);
     if(p.cat){ctx.fillStyle='#ff713b';ctx.fillText('▼ CHAT',p.x+p.w/2,p.y-28);}
   });
   ctx.textAlign='left';
@@ -251,10 +331,27 @@ function draw(){
 
 function loop(t){
   if(!running)return;
+  if(online){ /* en ligne : le serveur calcule, on dessine seulement */
+    draw();
+    const inp=myInput();
+    if(inp.l!==lastIn.l||inp.r!==lastIn.r||inp.j!==lastIn.j){lastIn=inp;wsSend({type:'input',l:inp.l,r:inp.r,j:inp.j});}
+    raf=requestAnimationFrame(loop);return;
+  }
   const dt=Math.min(.033,(t-last)/1000);last=t;
   update(dt);if(!running)return;draw();raf=requestAnimationFrame(loop);
 }
 
+/* Écran de fin (commun aux deux modes) */
+function showResult(sorted,youIdx){
+  const win=sorted[0];
+  ctx.fillStyle='rgba(12,14,17,.88)';ctx.fillRect(0,0,W,H);
+  ctx.textAlign='center';ctx.fillStyle='#d6ff3f';ctx.font='bold 72px Impact, sans-serif';
+  ctx.fillText((youIdx===win.i?'TU GAGNES !':'J'+(win.i+1)+' GAGNE !'),W/2,170);
+  ctx.font='18px DM Mono, monospace';
+  sorted.forEach((p,i)=>{ctx.fillStyle=COLORS[p.i];ctx.fillText((i+1)+'. J'+(p.i+1)+(p.i===youIdx?' (toi)':'')+' — chat '+p.time.toFixed(1)+'s',W/2,240+i*32);});
+  ctx.fillStyle='#fff';ctx.fillText('+'+(20+sorted.length*5)+' XP  •  clique « Quitter » pour rejouer',W/2,420);
+  ctx.textAlign='left';
+}
 function endGame(){
   running=false;cancelAnimationFrame(raf);draw();
   const sorted=[...players].sort((a,b)=>a.time-b.time),win=sorted[0];
@@ -262,14 +359,74 @@ function endGame(){
   if(save.games>=3)save.tasks.a=true;
   if(players.length===4&&win.i===0)save.tasks.b=true;
   if(players.some(p=>p.i===0&&p.time<=15))save.tasks.c=true;
-  store();
-  ctx.fillStyle='rgba(12,14,17,.88)';ctx.fillRect(0,0,W,H);
-  ctx.textAlign='center';ctx.fillStyle='#d6ff3f';ctx.font='bold 72px Impact, sans-serif';ctx.fillText('J'+(win.i+1)+' GAGNE !',W/2,170);
-  ctx.font='18px DM Mono, monospace';
-  sorted.forEach((p,i)=>{ctx.fillStyle=COLORS[p.i];ctx.fillText((i+1)+'. J'+(p.i+1)+' — chat '+p.time.toFixed(1)+'s',W/2,240+i*32);});
-  ctx.fillStyle='#fff';ctx.fillText('+'+(20+players.length*5)+' XP  •  clique « Quitter » pour rejouer',W/2,420);
-  ctx.textAlign='left';
+  store();showResult(sorted,0);
 }
+
+/* ===== MODE EN LIGNE ===== */
+let ws=null,lastIn={l:false,r:false,j:false},olN=0;
+const olStart=document.getElementById('ol-start'),olWait=document.getElementById('ol-wait'),olErr=document.getElementById('olErr');
+function showOnlineStart(){olStart.style.display='block';olWait.style.display='none';}
+function setErr(msg){olErr.textContent=msg||'';olErr.style.display=msg?'block':'none';}
+function wsSend(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o));}
+function closeWS(){if(ws){try{ws.onclose=null;ws.close();}catch(e){}ws=null;}}
+function connect(firstMsg){
+  setErr('');closeWS();
+  const proto=location.protocol==='https:'?'wss://':'ws://';
+  try{ws=new WebSocket(proto+location.host);}catch(e){setErr('Connexion impossible. Ouvre le jeu depuis ton lien Render (pas depuis un fichier).');return;}
+  ws.onopen=()=>wsSend(firstMsg);
+  ws.onerror=()=>setErr('Connexion au serveur impossible. Vérifie que le jeu est ouvert depuis ton lien Render.');
+  ws.onclose=()=>{if(online&&running){running=false;cancelAnimationFrame(raf);setErr('Connexion perdue.');stopGame();}else if(olWait.style.display==='block'){showOnlineStart();setErr('Connexion perdue.');}};
+  ws.onmessage=ev=>{let m;try{m=JSON.parse(ev.data);}catch(e){return;}onServer(m);};
+}
+function renderSlots(count,max){
+  const s=document.getElementById('slots');s.innerHTML='';
+  for(let i=0;i<max;i++){const d=document.createElement('div');d.className='slot'+(i<count?' on':'');if(i<count){d.style.borderColor=COLORS[i];d.style.background=COLORS[i]+'33';}d.textContent='J'+(i+1);s.appendChild(d);}
+}
+function onServer(m){
+  if(m.type==='joined'){
+    myIdx=m.you;olN=m.max;
+    olStart.style.display='none';olWait.style.display='block';
+    document.getElementById('roomCode').textContent=m.code;
+    renderSlots(m.you+1,m.max);
+    document.getElementById('waitTxt').textContent='Tu es le joueur J'+(m.you+1)+' ('+NAMES[m.you]+'). En attente des joueurs…';
+  }else if(m.type==='lobby'){
+    renderSlots(m.count,m.max);
+    document.getElementById('waitTxt').textContent=m.count+' / '+m.max+' joueurs connectés'+(m.count<m.max?' — en attente…':'');
+  }else if(m.type==='you'){
+    myIdx=m.you;
+  }else if(m.type==='error'){
+    setErr(m.msg);
+    if(m.abort){running=false;cancelAnimationFrame(raf);online=false;closeWS();menu_.style.display='block';gameWrap.style.display='none';showOnlineStart();}
+  }else if(m.type==='start'){
+    online=true;lastIn={l:false,r:false,j:false};players=[];
+    hudYou.style.display='inline-block';hudYou.textContent='TOI : J'+(myIdx+1)+' ('+NAMES[myIdx]+')';hudYou.style.borderColor=COLORS[myIdx];
+    menu_.style.display='none';gameWrap.style.display='block';setErr('');
+    running=true;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
+  }else if(m.type==='state'){
+    players=m.p.map(p=>({i:p.i,x:p.x,y:p.y,w:34,h:34,cat:p.cat,time:p.time,imm:p.imm,face:p.face}));
+    hudTime.textContent='TEMPS '+Math.max(0,Math.ceil(m.t));
+    const c=players.find(p=>p.cat);hudChat.textContent='CHAT : J'+((c?c.i:0)+1);
+  }else if(m.type==='end'){
+    running=false;cancelAnimationFrame(raf);draw();
+    const sorted=m.ranking;const win=sorted[0];
+    save.games++;save.wins[win.i]++;save.xp+=20+sorted.length*5;
+    if(save.games>=3)save.tasks.a=true;
+    if(sorted.length===4&&win.i===myIdx)save.tasks.b=true;
+    const me=sorted.find(p=>p.i===myIdx);if(me&&me.time<=15)save.tasks.c=true;
+    store();showResult(sorted,myIdx);
+    closeWS();
+  }
+}
+document.querySelectorAll('[data-create]').forEach(b=>b.onclick=()=>connect({type:'create',max:+b.dataset.create}));
+document.getElementById('joinBtn').onclick=()=>{
+  const code=document.getElementById('joinCode').value.trim().toUpperCase();
+  if(code.length!==4){setErr('Entre un code à 4 lettres.');return;}
+  connect({type:'join',code});
+};
+document.getElementById('joinCode').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('joinBtn').click();e.stopPropagation();});
+document.getElementById('joinCode').addEventListener('keyup',e=>e.stopPropagation());
+document.getElementById('cancelWait').onclick=()=>{wsSend({type:'leave'});closeWS();showOnlineStart();setErr('');};
+
 renderStats();
 </script>
 </body>
